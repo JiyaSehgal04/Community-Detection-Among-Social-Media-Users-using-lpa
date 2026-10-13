@@ -492,12 +492,52 @@ Louvain on the tuned graph. It refuses to run if `tuned_on` overlaps the test eg
    better communities. The objective is effectively purity, because follow modularity varies much less than purity across trials
    (standard deviation 0.025 vs 0.093 over the 60 train trials; the objective correlates 0.97 with purity over all 60 trials and 0.89 among the 27 feasible ones). (The tuned and default test means both being 0.106 is a coincidence; their
    per-ego values differ.)
-3. Louvain was run once (LPA is the best of 10 runs) and only on the tuned graph, so the comparison is not fully like-for-like. Louvain on the tuned graph is slightly ahead of tuned LPA on circle F1 (0.541 vs 0.534) and on follow modularity (0.126 vs 0.106); tuned LPA wins only on interest purity (0.623 vs 0.552), by producing more and smaller communities (16.9 vs 9.5 on average).
+3. Louvain was run once (LPA is the best of 10 runs) and only on the tuned graph, so the comparison is not fully like-for-like. Louvain on the tuned graph is slightly ahead of tuned LPA on circle F1 (0.541 vs 0.534, a gap that is not significant, see step 10b) and clearly ahead on follow modularity (0.126 vs 0.106); tuned LPA wins only on interest purity (0.623 vs 0.552), by producing more and smaller communities (16.9 vs 9.5 on average).
 4. The default config is infeasible under the tuning constraints on the train sample (largest share 0.775), so it is
    a plain baseline.
 5. The tuned config was evaluated on the test egos once, and no setting was chosen from test numbers. The test egos were seen earlier at default settings (the all-egos run in outputs/all, and 4 of the 20 largest egos used in step 5), and the evaluation was re-run once into a scratch folder to confirm it reproduces (results identical). Changing the objective or constraints now would make the test result tuned-on-test, so a new search would need a fresh split.
 6. About 8,300 of the 21,265 users in the test egos also appear in train/val egos. IDF and token-share statistics
    use all users (no labels involved).
+
+---
+
+## 10b. Extra analyses: ablation, sensitivity, error bars, stability ✅
+
+```bash
+python -m pipeline.analyze --which all     # about 10 min; or ablation | sensitivity | test | stability
+```
+
+Nothing here changes a setting. Ablation and sensitivity use the **validation** egos only (they refuse test
+egos). Omega, the bootstrap and stability describe the one frozen tuned config on the test egos (the Omega pass
+scores the test egos once more; the script checks it reproduces the saved final purity, difference about 1e-16).
+
+**Produces** in `outputs/analysis/`: `ablation.csv` / `ablation.png`, `sensitivity.csv` / `sensitivity.png`,
+`test_scores.csv` (per-ego scores incl. Omega), `bootstrap.csv`, `stability.csv`.
+
+**What it shows** (188 egos each; 95% intervals from 2,000 bootstrap resamples of egos):
+
+1. **Omega index** (overlap-aware agreement with circles; 1 = identical, 0 = chance). On the test egos: tuned 0.193,
+   default 0.222, Louvain 0.208, against 0.067 for the one-community baseline and 0.009 to 0.033 for a random partition
+   with the same community sizes. All three recover circle structure beyond chance, and unlike circle F1 Omega does not
+   reward one giant community. The differences between them are **not significant** (tuned minus default -0.028
+   [-0.073, 0.016]; tuned minus Louvain -0.015 [-0.042, 0.012]; 180 egos have scorable circles).
+2. **Error bars, tuned minus default / minus Louvain:** interest purity +0.261 [0.244, 0.277] / +0.071 [0.059, 0.082];
+   largest share -0.494 / +0.065 (the tuned biggest community is larger than Louvain's); follow modularity -0.000
+   [-0.014, 0.014] / -0.021 [-0.025, -0.016]; circle F1 -0.158 [-0.181, -0.132] / -0.007 [-0.022, 0.009]. So the tuned
+   config clearly beats the default on purity and giant-community share, is not distinguishable from Louvain on circle F1
+   (this corrects step 10's "slightly ahead"), and is clearly behind Louvain on follow modularity.
+3. **Ablation** (validation egos). Settings that matter: `hub_cap` (without it purity 0.578, largest share 0.438 vs
+   0.646 / 0.299), `follow_weight` (0.3 instead of 0.1: purity 0.582) and `direction` (any instead of mutual: purity 0.556).
+   `token_max_share`, `max_tokens`, `k` and `tokens` change purity by 0.01 or less. Interest-only has the highest purity
+   (0.821) but places only 58.5% of users, follow-only gives purity 0.550 and coverage 0.779: both break the tuning
+   constraints, and the hybrid is what satisfies them.
+4. **Sensitivity** (validation egos). Purity is flat in `k` (0.646 to 0.655 for k = 5 to 30) and sensitive to `min_sim`
+   (0.555 at 0.1, 0.646 at 0.2 to 0.3) and `follow_weight`. As `follow_weight` rises from 0.05 to 1.0, purity falls
+   (0.666 to 0.560) while Omega rises (0.167 to 0.270): interest purity and agreement with circles pull in opposite
+   directions. The objective is mostly purity, so it chose 0.1; a larger weight would be preferred if circle agreement
+   mattered more. Every swept configuration stays feasible.
+5. **Stability:** the median per-ego ARI between single LPA runs with different seeds is 0.779 (mean 0.760). Results
+   are reproducible for a seed but not identical across seeds; reported results use the best of 10 runs by modularity.
 
 ---
 
@@ -549,7 +589,7 @@ Open http://localhost:5173. The frontend expects the API at `http://localhost:80
 ## 13. Run the tests ✅
 
 ```bash
-pytest -q          # 74 tests, about 2 s; no dataset needed
+pytest -q          # 77 tests, about 2 s; no dataset needed
 ```
 
 All of these are covered (see the test table in [`CODE_GUIDE.md`](CODE_GUIDE.md)):
@@ -608,6 +648,7 @@ python -m pipeline.data_quality                  # step 6
 python -m pipeline.split                         # step 7 (once; refuses to overwrite)
 python -m pipeline.tune                          # step 9 (about 10 min)
 python -m pipeline.evaluate                      # step 10 (once; scores the test egos)
+python -m pipeline.analyze --which all           # step 10b (about 10 min)
 uvicorn backend.main:app --reload --port 8000    # step 11 (terminal 1)
 cd frontend && npm run dev                       # step 12 (terminal 2)
 pytest -q                                        # step 13

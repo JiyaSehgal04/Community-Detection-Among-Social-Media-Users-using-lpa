@@ -36,7 +36,7 @@ flowchart LR
 |---|---|
 | `pipeline/` | **Scripts you run**, one per stage. Each has a `main()` and runs as `python -m pipeline.<name>`. |
 | `backend/` | **Reusable logic**: graph building, the LPA algorithm, quality metrics. The pipeline uses it now, and the FastAPI app (step 11) will reuse it. |
-| `tests/` | One test file per module, 74 tests in total. Run with `pytest -q`. |
+| `tests/` | One test file per module, 77 tests in total. Run with `pytest -q`. |
 | `notebooks/` | `01_eda.ipynb`, the EDA with explanations. It calls `pipeline/eda.py`. |
 | `report/` | Written reports (`EDA_REPORT.md`). |
 | `data/` | `raw/` is downloaded (~350 MB, git-ignored); `processed/` is built by preprocessing (~23 MB). |
@@ -253,6 +253,25 @@ and Louvain on the tuned graph. `runtime_s` is 0.0 here (not measured).
 
 ---
 
+### 3.9 `analyze.py` (step 10b): explain the tuned config
+
+```bash
+python -m pipeline.analyze --which all     # ablation | sensitivity | test | stability
+```
+
+| | |
+|---|---|
+| **Reads** | `data/processed/*`, `split.json`, `outputs/tuning/best_config.json`, `outputs/final/metrics.csv` |
+| **Writes** | `outputs/analysis/` (CSVs and `ablation.png`, `sensitivity.png`) |
+
+`run_ablation` and `run_sensitivity` call `assert_no_test_egos` first, so they only run on validation egos.
+`run_test_scores` adds the Omega index and its two chance baselines for the tuned, default and Louvain variants on the
+test egos; `paired_bootstrap` resamples egos (not rows) for a 95% interval on each difference; `run_stability` measures
+how much single LPA runs with different seeds agree (ARI). `score_variant` is `tune.score_ego` plus Omega and works for
+any graph mode. None of these changes a setting.
+
+---
+
 ## 4. Backend modules (`backend/`)
 
 ### 4.1 `graphs.py`: from tables to graphs
@@ -315,6 +334,16 @@ not success. Always compare with `circle_f1_one_community` (the score of putting
 
 ---
 
+### 4.5 `overlap.py`: overlap-aware comparison with circles
+
+| Name | What it does |
+|---|---|
+| `omega_index(a, b, nodes)` | Chance-adjusted agreement of two (possibly overlapping) covers: for every pair of users, do they share the same *number* of groups in both? 1 = identical, about 0 = chance. |
+| `circle_omega(communities, circles)` | Omega of communities vs circles, scored only on users in at least one circle; NaN without circles (same rule as circle F1). |
+| `random_partition_like(communities, rng)` | A random partition with the same community sizes: the chance baseline to read Omega against. |
+
+---
+
 ## 5. Tests (`tests/`)
 
 All tests use tiny hand-made data, so they run in about 2 seconds without the real dataset.
@@ -333,9 +362,11 @@ All tests use tiny hand-made data, so they run in about 2 seconds without the re
 | `test_outliers.py` | 3 | Token-share rule, hub scaling (and off = no-op), rarest-N tokens rule |
 | `test_tune.py` | 2 | An infeasible config ranks below a feasible one; tuning refuses test egos |
 | `test_evaluate.py` | 1 | Guards: leaked config, wrong egos, existing outputs |
+| `test_overlap.py` | 1 | Omega index (known values, identical covers) and a random baseline below a perfect match |
+| `test_analyze.py` | 2 | Bootstrap is seeded and resamples egos; ablation and sensitivity refuse test egos |
 
 ```bash
-pytest -q                       # all 74
+pytest -q                       # all 77
 pytest -q tests/test_lpa.py     # one file
 ```
 
