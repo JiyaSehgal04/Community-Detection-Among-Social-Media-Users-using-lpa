@@ -1,0 +1,9 @@
+[project]
+name = "lpa-twitter-communities"
+version = "0.1.0"
+description = "Community detection among Twitter users by common interests using Label Propagation"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
