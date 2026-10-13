@@ -1,0 +1,11 @@
+{
+  "tokens_and_follows": 67816,
+  "tokens_only": 2572,
+  "follows_only": 8453,
+  "neither": 2465,
+  "total": 81306,
+  "definitions": {
+    "has_follows": "appears as src or dst of a non-self-loop row in follows_by_ego",
+    "has_tokens": "has at least one row in interests"
+  }
+}
