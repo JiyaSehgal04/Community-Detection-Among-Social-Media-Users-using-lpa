@@ -1,0 +1,17 @@
+{
+  "config": {
+    "k": 30,
+    "min_sim": 0.2,
+    "follow_weight": 0.1,
+    "direction": "mutual",
+    "tokens": "mention",
+    "token_max_share": 0.05,
+    "hub_cap": 10,
+    "max_tokens": 20
+  },
+  "mode": "quick",
+  "n_trials": 15,
+  "train_egos": 30,
+  "val_egos": 30,
+  "test_egos": 40
+}
