@@ -541,55 +541,80 @@ scores the test egos once more; the script checks it reproduces the saved final 
 
 ---
 
-## 11. Start the backend API 🛠
+## 11. Start the backend API ✅
 
 ```bash
 uvicorn backend.main:app --reload --port 8000
 ```
 
+Startup loads `data/processed/` once (about 3 s, override the folder with `LPA_DATA_DIR`; saved results are read from
+`outputs/`, override with `LPA_OUTPUTS_DIR`). If a table is missing or empty it stops and names the command to run.
+A run takes about 0.1 to 0.4 s even on the largest ego (251 nodes).
+
 **Check:** open http://localhost:8000/docs (Swagger UI) and try each endpoint:
 
-| Endpoint | Test |
+| Endpoint | What it does |
 |---|---|
-| `GET /api/egos` | returns 973 egos |
-| `POST /api/detect` | body `{"egos": "top5", "mode": "hybrid", "runs": 5}` returns a job_id |
-| `GET /api/graph/{job_id}` | returns nodes with `community` field |
-| `GET /api/communities/{job_id}` | returns top hashtags per community |
-| `GET /api/trace/{job_id}` | returns per-iteration label snapshots |
-| `GET /api/compare` | returns metrics for all modes |
-| `GET /api/users/{user_id}` | returns interests and community |
+| `GET /api/egos` | 973 egos: id, nodes, edges, density, circles |
+| `GET /api/stats` | the EDA numbers from `outputs/eda_stats.json` |
+| `POST /api/detect` | body `{"ego": 170729553, "mode": "hybrid", "direction": "mutual", "runs": 5}`. One ego per run. Returns a `job_id`, the metrics (always with `circle_f1_one_community` and `largest_share`; `circle_f1` is `null` for egos without circles) and `warnings` |
+| `GET /api/graph/{job_id}` | nodes (id, community, degree) and edges (source, target, weight) |
+| `GET /api/communities/{job_id}` | per community: size, purity, top hashtags and mentions |
+| `GET /api/trace/{job_id}` | one label per node for every iteration, plus how many nodes changed |
+| `GET /api/compare` | the saved top-20 summaries: 3 modes x 3 algorithms, for `any` and `mutual` follows |
+| `GET /api/users/{user_id}?job_id=` | the user's tokens; with a `job_id` also their community and the most similar users **in that run's ego** |
+
+Defaults: `direction=mutual` (the EDA found `any` collapses into one giant community), `runs=10`, `seed=42`.
+Limits: `runs` and `k` 1 to 50, `min_sim` 0 to 1; a bad value is a 422. An unknown ego, job or user is a 404, and
+every error has the shape `{"error": ..., "detail": ...}`. The newest 50 runs are kept in memory; an older `job_id`
+returns 404 ("run the detection again"). `warnings` flags a graph with no edges, a run that did not converge, a
+largest community above 70% of users, and more than 30% of users without tokens.
+Interest purity in the response always uses the full token set (hashtags and mentions), whatever `tokens` the run used.
 
 ---
 
-## 12. Start the frontend 🛠
+## 12. Start the frontend ✅
 
-In a second terminal:
+In a second terminal (the API from step 11 must be running):
 
 ```bash
 cd frontend
-npm install
+npm install        # first time only
 npm run dev
 ```
 
-Open http://localhost:5173. The frontend expects the API at `http://localhost:8000`
-(set `VITE_API_URL` in `frontend/.env` to change it).
+Open http://localhost:5173. It must be port 5173: the API only allows that origin (and `127.0.0.1:5173`).
+The frontend expects the API at `http://localhost:8000` (copy `frontend/.env.example` to `frontend/.env` and set
+`VITE_API_URL` to change it).
 
-**Check, page by page:**
+`npm run typecheck` checks the types and `npm run build` makes a production build. The API types in
+`frontend/src/api/schema.d.ts` are **generated** from the backend: after any change to `backend/schemas.py`,
+run `npm run gen:api` (it needs `data/processed/` and the project venv at `../.venv`) and fix the type errors it reveals.
 
-1. Explorer: dataset stats load, egos can be selected
-2. Run: changing mode and clicking Run returns results
-3. Graph: nodes coloured by community, hover shows hashtags
-4. Communities: one card per community with top hashtags
-5. Step-through: Play animates label propagation
-6. Compare: chart shows all modes and baselines
-7. User lookup: searching a user id shows their community
+**Check, page by page** (there are no frontend unit tests, so this list is the test):
+
+1. Explorer: dataset stats load, egos sort by column, a row click selects an ego and opens Run
+2. Run: changing the graph mode and pressing Run returns metric cards; warnings show in a yellow box; an ego without circles shows Circle F1 "n/a"
+3. Graph: users coloured by community (12 colours, grey "other"); hovering a user shows their interests
+4. Communities: one card per community with its top hashtags and mentions; a checkbox reveals users who are alone
+5. Step-through: Play animates label propagation; the slider jumps to an iteration
+6. Compare: chart and table show all graph modes and algorithms, with the one-community baseline marked
+7. User lookup: a user id shows their interests, community in the selected run and similar users
+
+Failure cases to try: stop the API (a red banner appears within about 10 s and screens say "The API is not reachable");
+restart the API and reload `/graph?job=<old id>` ("Not found … run the detection again" with a link).
+
+**Limitations:**
+
+- The Run screen has no tuned preset, because `POST /api/detect` does not accept the three outlier rules the tuned configuration uses.
+- Compare shows the saved top-20 experiment summaries, not the held-out final evaluation (`outputs/final/`), which has no endpoint yet.
 
 ---
 
 ## 13. Run the tests ✅
 
 ```bash
-pytest -q          # 77 tests, about 2 s; no dataset needed
+pytest -q          # 91 tests, about 2 s; no dataset needed
 ```
 
 All of these are covered (see the test table in [`CODE_GUIDE.md`](CODE_GUIDE.md)):

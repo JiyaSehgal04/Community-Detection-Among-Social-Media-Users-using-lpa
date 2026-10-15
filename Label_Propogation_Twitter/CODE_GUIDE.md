@@ -36,7 +36,7 @@ flowchart LR
 |---|---|
 | `pipeline/` | **Scripts you run**, one per stage. Each has a `main()` and runs as `python -m pipeline.<name>`. |
 | `backend/` | **Reusable logic**: graph building, the LPA algorithm, quality metrics. The pipeline uses it now, and the FastAPI app (step 11) will reuse it. |
-| `tests/` | One test file per module, 77 tests in total. Run with `pytest -q`. |
+| `tests/` | One test file per module, 91 tests in total. Run with `pytest -q`. |
 | `notebooks/` | `01_eda.ipynb`, the EDA with explanations. It calls `pipeline/eda.py`. |
 | `report/` | Written reports (`EDA_REPORT.md`). |
 | `data/` | `raw/` is downloaded (~350 MB, git-ignored); `processed/` is built by preprocessing (~23 MB). |
@@ -344,6 +344,34 @@ not success. Always compare with `circle_f1_one_community` (the score of putting
 
 ---
 
+### 4.6 The API: `service.py`, `app.py`, `schemas.py`, `main.py`
+
+| File | Job |
+|---|---|
+| `service.py` | All the logic, with no FastAPI imports: `run_detection` (build the graph, run LPA, score it, replay the best seed for the trace), `compute_warnings`, the `JobStore` (newest 50 runs, thread-safe), `validate_data_dir`, and one function per payload (`graph_payload`, `communities_payload`, `trace_payload`, `user_payload`, `egos_payload`, `compare_payload`, `stats_payload`). `NotFound` and `DataError` are its two errors. |
+| `app.py` | `create_app(data=None, data_dir=None, outputs_dir=None)`: the routes, CORS for `localhost:5173`, and the 404 and 422 handlers. Tests pass a ready `Dataset`. |
+| `schemas.py` | The pydantic request and response models (and so the OpenAPI schema the frontend types will be generated from). |
+| `main.py` | `app = create_app()` for `uvicorn backend.main:app`. |
+
+---
+
+### 4.7 The frontend (`frontend/`)
+
+A Vite + React + TypeScript single-page app that only talks to the API in 4.6.
+
+| Folder | What it holds |
+|---|---|
+| `src/api/` | `client.ts` (one typed function per endpoint, `ApiError`, the `ping` used by the unreachable banner), `useApi.ts` (loading/error state for any call), `types.ts` (short names for the generated types), `schema.d.ts` (**generated** by `npm run gen:api`, never edited by hand) |
+| `src/lib/` | `selection.ts` (the chosen ego and run live in the URL as `?ego=&job=`, so a refresh or a shared link keeps them), `format.ts` (n/a-safe number formatting), `colors.ts` (12 community colours, grey for the rest) |
+| `src/components/` | `Layout` (nav, "API unreachable" banner), `Status` (`Query` shows loading/error/content; `ErrorBox`; `NeedJob`), `ErrorBoundary`, `GraphView` (Cytoscape; builds the layout once, recolours in place), `Legend`, `MetricCards` |
+| `src/pages/` | one file per screen: Explorer, Run, Graph, Communities, StepThrough, Compare, UserLookup |
+
+How a screen is built: `const result = useApi(() => api.something(job), [job])`, then `<Query result={result}>{(data) => …}</Query>`.
+That gives every screen its loading, error and "run expired" states for free.
+
+To add a field: change `backend/schemas.py`, run `npm run gen:api`, then fix the type errors. There are no frontend unit
+tests; `npm run typecheck`, `npm run build` and the checklist in `EXECUTION_STEPS.md` step 12 are the guards.
+
 ## 5. Tests (`tests/`)
 
 All tests use tiny hand-made data, so they run in about 2 seconds without the real dataset.
@@ -364,9 +392,12 @@ All tests use tiny hand-made data, so they run in about 2 seconds without the re
 | `test_evaluate.py` | 1 | Guards: leaked config, wrong egos, existing outputs |
 | `test_overlap.py` | 1 | Omega index (known values, identical covers) and a random baseline below a perfect match |
 | `test_analyze.py` | 2 | Bootstrap is seeded and resamples egos; ablation and sensitivity refuse test egos |
+| `test_service.py` | 4 | Warnings (collapse, non-convergence, clean run), ego without edges or circles, job-store cap, trace start and end |
+| `test_api.py` | 10 | Detect returns the baseline and largest share, graph and community consistency, 422 on bad input (3 cases), 404 shape, user lookup stays in the ego, startup failure message, egos and compare |
+| `conftest.py` | (fixture) | The tiny dataset shared by the service and API tests |
 
 ```bash
-pytest -q                       # all 77
+pytest -q                       # all 91
 pytest -q tests/test_lpa.py     # one file
 ```
 
