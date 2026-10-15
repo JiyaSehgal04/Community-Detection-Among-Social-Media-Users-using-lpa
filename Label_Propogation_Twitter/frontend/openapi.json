@@ -1,0 +1,1000 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LPA Twitter communities",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/egos": {
+      "get": {
+        "summary": "Egos",
+        "operationId": "egos_api_egos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EgosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "summary": "Stats",
+        "operationId": "stats_api_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detect": {
+      "post": {
+        "summary": "Detect",
+        "operationId": "detect_api_detect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DetectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/graph/{job_id}": {
+      "get": {
+        "summary": "Graph",
+        "operationId": "graph_api_graph__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/communities/{job_id}": {
+      "get": {
+        "summary": "Communities",
+        "operationId": "communities_api_communities__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunitiesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trace/{job_id}": {
+      "get": {
+        "summary": "Trace",
+        "operationId": "trace_api_trace__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/compare": {
+      "get": {
+        "summary": "Compare",
+        "operationId": "compare_api_compare_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{user_id}": {
+      "get": {
+        "summary": "User",
+        "operationId": "user_api_users__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CommunitiesResponse": {
+        "properties": {
+          "communities": {
+            "items": {
+              "$ref": "#/components/schemas/CommunityCard"
+            },
+            "type": "array",
+            "title": "Communities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "communities"
+        ],
+        "title": "CommunitiesResponse"
+      },
+      "CommunityCard": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "purity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purity"
+          },
+          "top_hashtags": {
+            "items": {
+              "$ref": "#/components/schemas/TokenCount"
+            },
+            "type": "array",
+            "title": "Top Hashtags"
+          },
+          "top_mentions": {
+            "items": {
+              "$ref": "#/components/schemas/TokenCount"
+            },
+            "type": "array",
+            "title": "Top Mentions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "size",
+          "purity",
+          "top_hashtags",
+          "top_mentions"
+        ],
+        "title": "CommunityCard"
+      },
+      "CompareResponse": {
+        "properties": {
+          "rows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows"
+        ],
+        "title": "CompareResponse"
+      },
+      "DetectRequest": {
+        "properties": {
+          "ego": {
+            "type": "integer",
+            "title": "Ego"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "follow",
+              "interest",
+              "hybrid"
+            ],
+            "title": "Mode",
+            "default": "hybrid"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "any",
+              "mutual"
+            ],
+            "title": "Direction",
+            "default": "mutual"
+          },
+          "tokens": {
+            "type": "string",
+            "enum": [
+              "hashtag",
+              "mention",
+              "both"
+            ],
+            "title": "Tokens",
+            "default": "both"
+          },
+          "k": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "K",
+            "default": 10
+          },
+          "min_sim": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Min Sim",
+            "default": 0.2
+          },
+          "follow_weight": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Follow Weight",
+            "default": 0.3
+          },
+          "runs": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Runs",
+            "default": 10
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 42
+          }
+        },
+        "type": "object",
+        "required": [
+          "ego"
+        ],
+        "title": "DetectRequest"
+      },
+      "DetectResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "ego": {
+            "type": "integer",
+            "title": "Ego"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/Metrics"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "ego",
+          "params",
+          "metrics",
+          "warnings"
+        ],
+        "title": "DetectResponse"
+      },
+      "EgoRow": {
+        "properties": {
+          "ego_id": {
+            "type": "integer",
+            "title": "Ego Id"
+          },
+          "n_nodes": {
+            "type": "integer",
+            "title": "N Nodes"
+          },
+          "n_edges": {
+            "type": "integer",
+            "title": "N Edges"
+          },
+          "density": {
+            "type": "number",
+            "title": "Density"
+          },
+          "has_circles": {
+            "type": "boolean",
+            "title": "Has Circles"
+          },
+          "n_circles": {
+            "type": "integer",
+            "title": "N Circles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ego_id",
+          "n_nodes",
+          "n_edges",
+          "density",
+          "has_circles",
+          "n_circles"
+        ],
+        "title": "EgoRow"
+      },
+      "EgosResponse": {
+        "properties": {
+          "egos": {
+            "items": {
+              "$ref": "#/components/schemas/EgoRow"
+            },
+            "type": "array",
+            "title": "Egos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "egos"
+        ],
+        "title": "EgosResponse"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error"
+          },
+          "detail": {
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error",
+          "detail"
+        ],
+        "title": "ErrorResponse"
+      },
+      "GraphEdge": {
+        "properties": {
+          "source": {
+            "type": "integer",
+            "title": "Source"
+          },
+          "target": {
+            "type": "integer",
+            "title": "Target"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "weight"
+        ],
+        "title": "GraphEdge"
+      },
+      "GraphNode": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "community": {
+            "type": "integer",
+            "title": "Community"
+          },
+          "degree": {
+            "type": "integer",
+            "title": "Degree"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "community",
+          "degree"
+        ],
+        "title": "GraphNode"
+      },
+      "GraphResponse": {
+        "properties": {
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            },
+            "type": "array",
+            "title": "Edges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "title": "GraphResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Metrics": {
+        "properties": {
+          "modularity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modularity"
+          },
+          "follow_modularity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Follow Modularity"
+          },
+          "circle_f1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Circle F1"
+          },
+          "circle_f1_one_community": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Circle F1 One Community"
+          },
+          "interest_purity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interest Purity"
+          },
+          "n_communities": {
+            "type": "integer",
+            "title": "N Communities"
+          },
+          "n_singletons": {
+            "type": "integer",
+            "title": "N Singletons"
+          },
+          "coverage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage"
+          },
+          "largest_share": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Largest Share"
+          },
+          "iterations": {
+            "type": "integer",
+            "title": "Iterations"
+          },
+          "converged": {
+            "type": "boolean",
+            "title": "Converged"
+          },
+          "n_nodes": {
+            "type": "integer",
+            "title": "N Nodes"
+          },
+          "n_edges": {
+            "type": "integer",
+            "title": "N Edges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "modularity",
+          "follow_modularity",
+          "circle_f1",
+          "circle_f1_one_community",
+          "interest_purity",
+          "n_communities",
+          "n_singletons",
+          "coverage",
+          "largest_share",
+          "iterations",
+          "converged",
+          "n_nodes",
+          "n_edges"
+        ],
+        "title": "Metrics"
+      },
+      "SimilarUser": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "similarity": {
+            "type": "number",
+            "title": "Similarity"
+          },
+          "community": {
+            "type": "integer",
+            "title": "Community"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "similarity",
+          "community"
+        ],
+        "title": "SimilarUser"
+      },
+      "StatsResponse": {
+        "properties": {
+          "stats": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Stats"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stats"
+        ],
+        "title": "StatsResponse"
+      },
+      "TokenCount": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "count"
+        ],
+        "title": "TokenCount"
+      },
+      "TraceResponse": {
+        "properties": {
+          "nodes": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "snapshots": {
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Snapshots"
+          },
+          "changed": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nodes",
+          "snapshots",
+          "changed"
+        ],
+        "title": "TraceResponse"
+      },
+      "UserResponse": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "egos": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Egos"
+          },
+          "tokens": {
+            "items": {
+              "$ref": "#/components/schemas/UserToken"
+            },
+            "type": "array",
+            "title": "Tokens"
+          },
+          "community": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Community"
+          },
+          "similar_users": {
+            "items": {
+              "$ref": "#/components/schemas/SimilarUser"
+            },
+            "type": "array",
+            "title": "Similar Users"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "egos",
+          "tokens",
+          "community",
+          "similar_users"
+        ],
+        "title": "UserResponse"
+      },
+      "UserToken": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "type"
+        ],
+        "title": "UserToken"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
